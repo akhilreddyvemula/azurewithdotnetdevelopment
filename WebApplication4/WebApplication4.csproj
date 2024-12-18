@@ -4,6 +4,13 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationInsightsResourceId>/subscriptions/5942bc94-5c1a-42d5-977c-e8656aac87c4/resourceGroups/az-akhil-dev/providers/microsoft.insights/components/mycicdpipeline</ApplicationInsightsResourceId>
+    <UserSecretsId>6c85eedf-5fcf-4076-8f25-7393cbe33f00</UserSecretsId>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Azure.Identity" Version="1.13.0" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0" />
+  </ItemGroup>
 
 </Project>
