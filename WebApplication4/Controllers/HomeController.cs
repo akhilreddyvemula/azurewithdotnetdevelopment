@@ -20,6 +20,7 @@ namespace WebApplication4.Controllers
 
         public IActionResult Privacy()
         {
+            throw new Exception("my test data");
             return View();
         }
 
