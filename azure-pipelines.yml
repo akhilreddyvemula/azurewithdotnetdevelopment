@@ -1,34 +1,49 @@
-# ASP.NET Core (.NET Framework)
-# Build and test ASP.NET Core projects targeting the full .NET Framework.
-# Add steps that publish symbols, save build artifacts, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
-
 trigger:
-- master
+- master  # Automatically triggers the pipeline on pushes to the master branch.
 
 pool:
-  vmImage: 'windows-latest'
+  vmImage: 'windows-latest'  # Use a Windows VM image suitable for .NET Framework builds.
 
 variables:
-  solution: '**/*.sln'
+  solution: '**/*.sln'  # Path to the solution file(s).
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
 
 steps:
+# Install NuGet (ensures NuGet is available in the environment).
 - task: NuGetToolInstaller@1
 
+# Restore NuGet packages.
 - task: NuGetCommand@2
   inputs:
     restoreSolution: '$(solution)'
 
+# Build the solution using Visual Studio Build task.
 - task: VSBuild@1
   inputs:
     solution: '$(solution)'
-    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation="$(build.artifactStagingDirectory)\WebApp.zip" /p:DeployIisAppPath="Default Web Site"'
+    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(Build.ArtifactStagingDirectory)\WebApp.zip"'
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
 
+# Run unit tests if applicable.
 - task: VSTest@2
   inputs:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
+
+# Publish the build artifacts (ensure the build output is available for deployment).
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
+
+# Deploy the web application to Azure App Service.
+- task: AzureRmWebAppDeployment@4
+  inputs:
+    ConnectionType: 'AzureRM'
+    azureSubscription: 'Visual Studio Professional Subscription(5942bc94-5c1a-42d5-977c-e8656aac87c4)'
+    appType: 'webApp'
+    WebAppName: 'mytestdata'
+    packageForLinux: '$(Build.ArtifactStagingDirectory)/WebApp.zip'
